@@ -18,16 +18,17 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.13'
-      - name: Download exact OR-Tools wheel
+      - name: Download exact OR-Tools wheel and missing runtime dependency
         run: |
           set -euxo pipefail
           mkdir -p artifact
           python -m pip download --only-binary=:all: --no-deps --dest artifact 'ortools==9.15.6755'
+          python -m pip download --only-binary=:all: --no-deps --dest artifact 'immutabledict>=3.0.0'
           sha256sum artifact/* | tee artifact/SHA256SUMS.txt
-      - name: Upload wheel
+      - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: ortools-9.15.6755-cp313-linux-wheel
+          name: ortools-9.15.6755-cp313-linux-wheels-v2
           path: artifact/
           if-no-files-found: error
           retention-days: 1
