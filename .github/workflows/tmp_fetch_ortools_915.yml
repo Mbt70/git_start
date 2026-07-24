@@ -2,15 +2,19 @@ name: tmp-fetch-ortools-9.15
 
 on:
   push:
+    branches: [main]
+    paths:
+      - '.github/workflows/tmp_fetch_ortools_915.yml'
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   fetch:
     runs-on: ubuntu-24.04
     steps:
+      - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
         with:
           python-version: '3.13'
@@ -27,3 +31,12 @@ jobs:
           path: artifact/
           if-no-files-found: error
           retention-days: 1
+      - name: Record workflow run id
+        run: |
+          set -euxo pipefail
+          printf '%s\n' "$GITHUB_RUN_ID" > tmp_ortools_run_id.txt
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add tmp_ortools_run_id.txt
+          git commit -m 'chore: record temporary OR-Tools wheel artifact run' || exit 0
+          git push
